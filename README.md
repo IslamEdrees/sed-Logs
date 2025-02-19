@@ -66,3 +66,67 @@ SOURCE /home/islam/result2.log;
 - Always backup the database before making bulk insertions.
 - Modify the script as needed to fit your database schema and log format.
 
+- Here Last update SCRIPT
+- #!/bin/bash
+
+LOG_DIR="/var/log/PATH-LOGSHERE"
+DEST_DIR="/home/islam/ctilog"
+RESULT1="/home/islam/result1.log"
+RESULT2="/home/islam/result2.log"
+DB_USER="YOURDBUSER"
+DB_PASS="YOUDBPASS"
+DB_NAME="YOURSCHEMA NAME"
+
+read -p "Enter the date (YYYY-MM-DD): " LOG_DATE
+
+cp $LOG_DIR/cti_${LOG_DATE}-*.log $DEST_DIR/
+echo "Log files copied to $DEST_DIR."
+
+for LOG_FILE in $DEST_DIR/cti_${LOG_DATE}-*.log; do
+    echo "Processing $LOG_FILE..."
+    read -p "Continue processing this file? (y/n): " CONFIRM
+    if [[ "$CONFIRM" != "y" ]]; then
+        continue
+    fi
+    
+    grep "isInCall\[false\]" "$LOG_FILE" | while read -r line; do
+        AGENT_ID=$(echo "$line" | sed -n 's/.*Agent\[\([0-9]\+\)\].*/\1/p');
+        if [[ -n "$AGENT_ID" ]]; then
+            grep "INSERT INTO DATAMART_AGENT_DETAILS" "$LOG_FILE" | grep "'$AGENT_ID'"
+        fi
+    done > "$RESULT1"
+    
+    echo "Extracted relevant log data to $RESULT1."
+    cat "$RESULT1"
+    read -p "Proceed with extraction to SQL format? (y/n): " CONFIRM
+    if [[ "$CONFIRM" != "y" ]]; then
+        continue
+    fi
+    
+    sed -n "s/.*\(INSERT INTO DATAMART_AGENT_DETAILS.*\)/\1/p" "$RESULT1" > "$RESULT2"
+    
+    echo "Extracted SQL insert statements to $RESULT2."
+    cat "$RESULT2"
+    read -p "Proceed with SQL cleaning? (y/n): " CONFIRM
+    if [[ "$CONFIRM" != "y" ]]; then
+        continue
+    fi
+    
+    sed -i 's/\]$//' "$RESULT2"
+    sed -i 's/\]\.$//' "$RESULT2"
+    sed -i 's/$/;/' "$RESULT2"
+    
+    echo "Cleaned SQL statements in $RESULT2:"
+    cat "$RESULT2"
+    read -p "Proceed with database insertion? (y/n): " CONFIRM
+    if [[ "$CONFIRM" != "y" ]]; then
+        continue
+    fi
+
+    mysql -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" -A -e "SOURCE $RESULT2;"
+    echo "Database updated successfully."
+done
+
+echo "All logs processed."
+
+
