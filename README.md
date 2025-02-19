@@ -129,4 +129,65 @@ done
 
 echo "All logs processed."
 
+# Bash Script 
+
+## Description
+This script automates the process of extracting relevant data from log files and inserting it into a MySQL database. It performs the following steps:
+
+1. Copies log files from a specified directory to a destination folder.
+2. Extracts specific log entries related to agent call statuses.
+3. Formats the extracted data into SQL `INSERT` statements.
+4. Cleans and structures the SQL statements properly.
+5. Inserts the cleaned SQL data into a MySQL database.
+
+## Prerequisites
+- Linux environment with Bash support.
+- MySQL installed and accessible.
+- Necessary permissions to access log files and execute MySQL commands.
+
+## Installation
+1. Clone the repository:
+   ```sh
+   git clone <repository_url>
+   cd <repository_directory>
+   ```
+2. Ensure the script is executable:
+   ```sh
+   chmod +x script.sh
+   ```
+
+## Usage
+1. Run the script:
+   ```sh
+   ./script.sh
+   ```
+2. Enter the required date when prompted (format: `YYYY-MM-DD`).
+3. Follow the interactive prompts to process logs and update the database.
+
+## Configuration
+Update the script variables as needed:
+- `LOG_DIR`: Path to the log files.
+- `DEST_DIR`: Destination directory for copied logs.
+- `DB_USER`: MySQL database user.
+- `DB_PASS`: MySQL database password.
+- `DB_NAME`: MySQL database schema name.
+
+## Example
+```sh
+Enter the date (YYYY-MM-DD): 2025-02-18
+Log files copied to /home/islam/ctilog.
+Processing /home/islam/ctilog/cti_2025-02-18-001.log...
+Extracted SQL insert statements to /home/islam/result2.log.
+Database updated successfully.
+```
+
+## Notes
+- Ensure MySQL credentials are correctly set.
+- Run the script with appropriate permissions.
+- Modify `LOG_DIR` and `DEST_DIR` paths based on your environment.
+
+
+
+
+
 
